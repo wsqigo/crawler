@@ -1,9 +1,11 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"io"
 	"net/http"
+	"strings"
 )
 
 func main() {
@@ -13,7 +15,6 @@ func main() {
 		fmt.Println("fetch url error:", err)
 		return
 	}
-
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
@@ -27,5 +28,15 @@ func main() {
 		return
 	}
 
-	fmt.Println("body:", string(body))
+	numLinks := strings.Count(string(body), "<a")
+	fmt.Printf("homepage has %d links!\n", numLinks)
+
+	numLinks = bytes.Count(body, []byte("<1"))
+	fmt.Printf("homepage has %d links!\n", numLinks)
+
+	exists := strings.Contains(string(body), "疫情")
+	fmt.Printf("是否存在疫情：%v\n", exists)
+
+	exists = bytes.Contains(body, []byte("疫情"))
+	fmt.Printf("是否存在疫情: %v\n", exists)
 }
