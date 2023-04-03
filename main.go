@@ -9,16 +9,23 @@ import (
 	"golang.org/x/text/transform"
 	"io"
 	"net/http"
+	"regexp"
 )
 
+var headerRe = regexp.MustCompile(`<div>[\s\S]*?<div class="index_carousel_img__HbOWM"[\s\S]*?<a.*?alt="([\s\S]*?)"/>`)
+
 func main() {
-	url := "https://www.chinanews.com/"
+	url := "https://www.thepaper.cn/"
 	body, err := Fetch(url)
 	if err != nil {
 		fmt.Println("read content failed:", err)
 		return
 	}
-	fmt.Println(string(body))
+
+	matches := headerRe.FindAllSubmatch(body, -1)
+	for _, m := range matches {
+		fmt.Println("fetch card news:", string(m[1]))
+	}
 }
 
 func Fetch(url string) ([]byte, error) {
