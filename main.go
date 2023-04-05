@@ -4,7 +4,7 @@ import (
 	"bufio"
 	"bytes"
 	"fmt"
-	"github.com/antchfx/htmlquery"
+	"github.com/PuerkitoBio/goquery"
 	"golang.org/x/net/html/charset"
 	"golang.org/x/text/encoding"
 	"golang.org/x/text/encoding/unicode"
@@ -21,16 +21,21 @@ func main() {
 		return
 	}
 
-	doc, err := htmlquery.Parse(bytes.NewReader(body))
+	// 加载HTML文档
+	doc, err := goquery.NewDocumentFromReader(bytes.NewReader(body))
 	if err != nil {
-		fmt.Println("htmlquery.Parse failed", err)
+		fmt.Println("read content failed", err)
 		return
 	}
 
-	nodes := htmlquery.Find(doc, `.//div[@class="index_carousel_img__HbOWM"]/a[@target="_blank"]/img`)
-	for _, node := range nodes {
-		fmt.Println("fetch card ", node.Attr[1].Val)
-	}
+	doc.Find("div.index_carousel_img__HbOWM a[target=_blank] img").Each(
+		func(i int, s *goquery.Selection) {
+			// 获取匹配标签中的value
+			title, exist := s.Attr("alt")
+			if exist {
+				fmt.Printf("Review %d: %s\n", i, title)
+			}
+		})
 }
 
 func Fetch(url string) ([]byte, error) {
